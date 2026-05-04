@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Senaat: On Air — Video Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --c-accent: #E84040;
+    --c-dark: #0f0f0f;
+    --c-surface: #1a1a1a;
+    --c-border: rgba(255,255,255,0.08);
+    --c-text: #f0ece4;
+    --c-muted: rgba(240,236,228,0.5);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html, body {
+    background: var(--c-dark);
+    color: var(--c-text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 3rem 2.5rem 2rem;
+    border-bottom: 0.5px solid var(--c-border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(232,64,64,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--c-accent); color: #fff;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 3px; margin-bottom: 1rem;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #fff; animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 700; line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  .hero-title span { color: var(--c-accent); }
+  .hero-sub {
+    font-size: 14px; color: var(--c-muted);
+    font-weight: 300; letter-spacing: 0.02em;
+  }
+
+  /* ── CONTROLS ── */
+  .controls-wrap { border-bottom: 0.5px solid var(--c-border); }
+
+  .lang-bar {
+    padding: 0.85rem 2.5rem;
+    display: flex; gap: 8px; align-items: center;
+    border-bottom: 0.5px solid var(--c-border);
+    flex-wrap: wrap;
+  }
+  .lang-label { font-size: 11px; color: var(--c-muted); margin-right: 4px; }
+
+  .filter-bar {
+    padding: 1rem 2.5rem;
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+
+  button {
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.18s;
+    border: none; outline: none;
+  }
+
+  .lang-btn {
+    font-size: 12px; font-weight: 400;
+    padding: 5px 14px; border-radius: 20px;
+    border: 0.5px solid rgba(255,255,255,0.2);
+    background: transparent; color: var(--c-muted);
+  }
+  .lang-btn:hover { border-color: rgba(255,255,255,0.35); color: var(--c-text); }
+  .lang-btn.active-all  { background: rgba(232,64,64,0.15); border-color: var(--c-accent); color: var(--c-accent); }
+  .lang-btn.active-en   { background: #1a1a2e; border-color: #6c8ebf; color: #aed6f1; }
+  .lang-btn.active-ar   { background: #1a2e1a; border-color: #5a8a5a; color: #a8d5a8; }
+
+  .tag {
+    font-size: 12px; font-weight: 400;
+    padding: 5px 14px; border-radius: 20px;
+    border: 0.5px solid rgba(255,255,255,0.15);
+    background: transparent; color: var(--c-muted);
+  }
+  .tag:hover { border-color: rgba(255,255,255,0.3); color: var(--c-text); }
+  .tag.active { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
+
+  .count-label { margin-left: auto; font-size: 12px; color: var(--c-muted); }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--c-border);
+  }
+
+  .card {
+    background: var(--c-dark);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex; flex-direction: column;
+    text-decoration: none;
+  }
+  .card:hover { background: var(--c-surface); }
+
+  .thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #111;
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .thumb-overlay {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.35);
+    transition: background 0.2s;
+  }
+  .card:hover .thumb-overlay { background: rgba(0,0,0,0.1); }
+  .play-btn {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(232,64,64,0.9);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s;
+  }
+  .card:hover .play-btn { transform: scale(1.08); }
+  .play-arrow {
+    width: 0; height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 14px solid #fff;
+    margin-left: 3px;
+  }
+
+  .corner-badges {
+    position: absolute; top: 8px; left: 8px;
+    display: flex; gap: 4px;
+  }
+  .badge {
+    font-size: 9.5px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 2px;
+  }
+  .badge.senaat { background: var(--c-accent); color: #fff; }
+  .badge.zamil  { background: #1a3a5c; color: #aed6f1; }
+  .badge.ar     { background: #1a2e1a; color: #a8d5a8; }
+  .badge.en     { background: #2e2a1a; color: #d5caa8; }
+
+  .card-body {
+    padding: 0.85rem 1rem 1rem;
+    flex: 1; display: flex; flex-direction: column; gap: 6px;
+  }
+  .card-title {
+    font-size: 13.5px; font-weight: 500;
+    line-height: 1.45; color: var(--c-text);
+  }
+  .card-title.rtl { direction: rtl; text-align: right; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; }
+  .card-meta {
+    font-size: 11.5px; color: var(--c-muted);
+    display: flex; gap: 8px; margin-top: auto; flex-wrap: wrap;
+  }
+  .card-meta.rtl { direction: rtl; justify-content: flex-end; }
+
+  .empty {
+    padding: 4rem 2.5rem;
+    text-align: center; color: var(--c-muted); font-size: 14px;
+    grid-column: 1 / -1;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 1.5rem 2.5rem;
+    border-top: 0.5px solid var(--c-border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 10px;
+  }
+  .footer-brand {
+    font-family: var(--font-display);
+    font-size: 14px; color: var(--c-muted);
+  }
+  .footer-brand span { color: var(--c-accent); }
+  .footer-link {
+    font-size: 12px; color: var(--c-muted);
+    text-decoration: none;
+    border: 0.5px solid rgba(255,255,255,0.15);
+    padding: 6px 16px; border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .footer-link:hover { border-color: var(--c-accent); color: var(--c-accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .hero, .lang-bar, .filter-bar, .footer { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .count-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="live-badge"><span class="live-dot"></span> Video Hub</div>
+  <h1 class="hero-title">Senaat<span>:</span> On Air</h1>
+  <p class="hero-sub">Every video. Every story. From Zamil Industrial to Senaat — in Arabic &amp; English.</p>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls-wrap">
+  <div class="lang-bar">
+    <span class="lang-label">Language:</span>
+    <button class="lang-btn active-all" data-lang="all">All</button>
+    <button class="lang-btn" data-lang="en">English</button>
+    <button class="lang-btn" data-lang="ar">عربي</button>
+  </div>
+  <div class="filter-bar">
+    <button class="tag active" data-filter="all">All</button>
+    <button class="tag" data-filter="senaat">Senaat</button>
+    <button class="tag" data-filter="zamil">Zamil Industrial</button>
+    <button class="tag" data-filter="news">News &amp; Media</button>
+    <button class="tag" data-filter="projects">Projects &amp; Awards</button>
+    <span class="count-label" id="count"></span>
+  </div>
+</div>
+
+<!-- VIDEO GRID -->
+<div class="grid" id="grid"></div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-brand">Senaat<span>: On Air</span></span>
+  <a class="footer-link" href="https://www.youtube.com/@SenaatCompany" target="_blank" rel="noopener">
+    Visit Official Channel →
+  </a>
+</div>
+
+<script>
+  var videos = [
+    // ── English ──
+    { id:"FyA38WVlVBE",  title:"Zamil Industrial is Now SENAAT — A New Era Begins",                             channel:"SENAAT Company",      date:"Oct 2025",    category:"senaat",   brand:"senaat", lang:"en" },
+    { id:"2mDYDUVjlzc",  title:"The Official Reveal of SENAAT (formerly Zamil Industrial)",                     channel:"SENAAT Company",      date:"2025",        category:"senaat",   brand:"senaat", lang:"en" },
+    { id:"7fRuHa449qw",  title:"SENAAT Chairman Abdulla Al Zamil on Al Arabiya — Rebranding Story",             channel:"Al Arabiya",          date:"Oct 2025",    category:"news",     brand:"senaat", lang:"en" },
+    { id:"xk385lZbWBw",  title:"AlArabiya Interviews Hamad Al Zamil — SENAAT's Vision",                        channel:"Al Arabiya",          date:"2025",        category:"news",     brand:"senaat", lang:"en" },
+    { id:"5BKsb7QopMw",  title:"Zamil Industrial Investment Company — Full Corporate Video",                    channel:"Zamil Industrial",    date:"2021",        category:"zamil",    brand:"zamil",  lang:"en" },
+    { id:"0G-a4LnN3-I",  title:"Reshaping Heavy Industry Through IT-Driven Transformation",                     channel:"Zamil Industrial",    date:"Mar 2025",    category:"zamil",    brand:"zamil",  lang:"en" },
+    { id:"oWDBuK4drKc",  title:"Zamil Steel Wins the MODON Industrial Excellence Award",                        channel:"Zamil Steel",         date:"Dec 2025",    category:"projects", brand:"zamil",  lang:"en" },
+    { id:"FbtPZ-f-jjY",  title:"Zamil Industrial CEO at EFG Hermes Investors Conference",                       channel:"Asharq Business",     date:"Apr 2025",    category:"news",     brand:"zamil",  lang:"en" },
+    // ── Arabic ──
+    { id:"9amsGTe_D9I",  title:"شركة الزامل للاستثمار الصناعي — الفيديو الكامل",                               channel:"الزامل للصناعة",      date:"2021",        category:"zamil",    brand:"zamil",  lang:"ar" },
+    { id:"-fx8yqTU8-4",  title:"الرئيس التنفيذي للزامل للصناعة: تضاعف الدخل الصافي إلى 3 مرات",               channel:"CNBC Arabia",         date:"مايو 2025",   category:"news",     brand:"zamil",  lang:"ar" },
+    { id:"FBlbD9URRxA",  title:"الرئيس التنفيذي للزامل: قطاع الحديد مثّل 50% من الأرباح",                     channel:"CNBC Arabia",         date:"أغسطس 2025",  category:"news",     brand:"zamil",  lang:"ar" },
+    { id:"TF7wHp7d20Q",  title:"الرئيس التنفيذي أحمد الزعتري يستعرض نتائج الربع الثاني 2025",                 channel:"اقتصاد الشرق",        date:"أغسطس 2025",  category:"news",     brand:"zamil",  lang:"ar" },
+    { id:"XfkdP9CzUls",  title:"سهم صناعات — متابعة أداء شركة صناعات البناء المتقدمة",                        channel:"الأسواق المالية",     date:"أكتوبر 2025", category:"senaat",   brand:"senaat", lang:"ar" },
+    { id:"4zDYdSgJgHk",  title:"حمد الزامل يستعرض الأداء المالي للربع الثاني 2025 — الإخبارية",               channel:"قناة الإخبارية",      date:"أغسطس 2025",  category:"news",     brand:"zamil",  lang:"ar" },
+    { id:"5BQS7aqRDh8",  title:"Zamil Industrial — مدير الاتصالات في معرض Jeddah Construct 2024",              channel:"Big 5 Construct",     date:"أبريل 2024",  category:"projects", brand:"zamil",  lang:"ar" },
+    { id:"IguT0bEsPgE",  title:"الحلقة الخامسة: شركة الزامل للصناعة",                                         channel:"برامج اقتصادية",      date:"2023",        category:"zamil",    brand:"zamil",  lang:"ar" }
+  ];
+
+  var activeLang   = "all";
+  var activeFilter = "all";
+
+  function render() {
+    var grid = document.getElementById("grid");
+    var filtered = videos.filter(function(v) {
+      var langOk   = (activeLang   === "all") || (v.lang     === activeLang);
+      var filterOk = (activeFilter === "all") || (v.category === activeFilter);
+      return langOk && filterOk;
+    });
+
+    document.getElementById("count").textContent =
+      filtered.length + " video" + (filtered.length !== 1 ? "s" : "");
+
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="empty">No videos match this filter.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(function(v) {
+      var isAr = v.lang === "ar";
+      return [
+        '<a class="card" href="https://www.youtube.com/watch?v=' + v.id + '" target="_blank" rel="noopener">',
+          '<div class="thumb">',
+            '<img src="https://img.youtube.com/vi/' + v.id + '/mqdefault.jpg" alt="' + v.title + '" loading="lazy" onerror="this.style.background=\'#222\'" />',
+            '<div class="thumb-overlay">',
+              '<div class="play-btn"><div class="play-arrow"></div></div>',
+            '</div>',
+            '<div class="corner-badges">',
+              '<span class="badge ' + v.brand + '">' + (v.brand === "senaat" ? "Senaat" : "Zamil") + '</span>',
+              '<span class="badge ' + v.lang + '">' + (isAr ? "عربي" : "EN") + '</span>',
+            '</div>',
+          '</div>',
+          '<div class="card-body">',
+            '<div class="card-title' + (isAr ? " rtl" : "") + '">' + v.title + '</div>',
+            '<div class="card-meta' + (isAr ? " rtl" : "") + '">',
+              '<span>' + v.channel + '</span>',
+              '<span>·</span>',
+              '<span>' + v.date + '</span>',
+            '</div>',
+          '</div>',
+        '</a>'
+      ].join("");
+    }).join("");
+  }
+
+  // Language buttons
+  document.querySelectorAll(".lang-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll(".lang-btn").forEach(function(b) {
+        b.className = "lang-btn";
+      });
+      var lang = btn.getAttribute("data-lang");
+      activeLang = lang;
+      btn.classList.add(lang === "all" ? "active-all" : lang === "en" ? "active-en" : "active-ar");
+      render();
+    });
+  });
+
+  // Category filters
+  document.querySelectorAll(".tag").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll(".tag").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      activeFilter = btn.getAttribute("data-filter");
+      render();
+    });
+  });
+
+  render();
+</script>
+</body>
+</html>
